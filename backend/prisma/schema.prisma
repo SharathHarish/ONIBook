@@ -1,50 +1,55 @@
-generator client {
-provider = "prisma-client-js"
-}
-
-
 datasource db {
-provider = "postgresql"
-url = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
 
 model User {
-id Int @id @default(autoincrement())
-email String @unique
-password String
-name String?
-role UserRole @default(USER)
-borrowed Borrow[]
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
-}
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
+  borrowRecords BorrowRecord[]
+}
 
 model Author {
-id Int @id @default(autoincrement())
-name String
-bio String?
-books Book[]
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
-}
+  id        Int       @id @default(autoincrement())
+  name      String
+  bio       String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  books Book[]
+}
 
 model Book {
-id Int @id @default(autoincrement())
-title String
-description String?
-author Author @relation(fields: [authorId], references: [id])
-authorId Int
-publishedAt DateTime?
-isbn String? @unique
-copies Int @default(1)
-borrowed Borrow[]
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String?
+  authorId      Int
+  isBorrowed    Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  author        Author         @relation(fields: [authorId], references: [id])
+  borrowRecords BorrowRecord[]
 }
 
+model BorrowRecord {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  bookId     Int
+  borrowDate DateTime  @default(now())
+  returnDate DateTime?
 
-model Borrow {
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([userId, bookId, borrowDate])
 }

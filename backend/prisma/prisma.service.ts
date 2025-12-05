@@ -1,18 +1,16 @@
+// src/prisma/prisma.service.ts
 import { Injectable, OnModuleInit, INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  // Called once the module is initialized
   async onModuleInit() {
     await this.$connect();
   }
 
-  // Enable graceful shutdown hooks
   async enableShutdownHooks(app: INestApplication) {
-    app.enableShutdownHooks(); // Enable NestJS shutdown hooks
+    app.enableShutdownHooks();
 
-    // Optional: handle process signals manually
     process.on('SIGINT', async () => {
       await this.$disconnect();
       process.exit(0);
@@ -21,17 +19,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     process.on('SIGTERM', async () => {
       await this.$disconnect();
       process.exit(0);
-    });
-  }
-
-  // Optional: add query logging
-  enableQueryLogging() {
-    this.$on('query', (event) => {
-      console.log(`Query: ${event.query} | Params: ${event.params}`);
-    });
-
-    this.$on('error', (event) => {
-      console.error(`Prisma error: ${event.message}`);
     });
   }
 }
